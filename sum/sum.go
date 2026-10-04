@@ -1,9 +1,9 @@
-// Package sum provides shared value representations for hgo Option and Result.
+// Package sum provides shared value representations for Goxide Option and Result.
 // Shape validation does not replace compiler-generated payload validation.
 package sum
 
-// HgoSumABI identifies the representation contract, not a module release.
-const HgoSumABI = 1
+// GoxideSumABI identifies the representation contract, not a module release.
+const GoxideSumABI = 2
 
 // Option contains a Some value or nil (None).
 // The private marker carries T even when the value is None.
@@ -27,7 +27,7 @@ func ValidateOption[T any](value Option[T]) {
 	case nil, Some[T]:
 		return
 	default:
-		panic("hgo: invalid enum Option")
+		panic("goxide: invalid enum Option")
 	}
 }
 
@@ -58,6 +58,6 @@ func ValidateResult[T, E any](value Result[T, E]) {
 	case Ok[T, E], Err[T, E]:
 		return
 	default:
-		panic("hgo: invalid enum Result")
+		panic("goxide: invalid enum Result")
 	}
 }
