@@ -5,6 +5,10 @@ package sum
 // GoxideSumABI identifies the representation contract, not a module release.
 const GoxideSumABI = 3
 
+// Tag names Go's int type for generated discriminants even when a source
+// package declares its own int. It does not change the runtime representation.
+type Tag = int
+
 // Option has an independent inline Some slot. Its zero value is None.
 // Assignment copies the slot with ordinary Go shallow-value semantics.
 type Option[T any] struct {
