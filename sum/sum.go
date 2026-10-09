@@ -3,61 +3,114 @@
 package sum
 
 // GoxideSumABI identifies the representation contract, not a module release.
-const GoxideSumABI = 2
+const GoxideSumABI = 3
 
-// Option contains a Some value or nil (None).
-// The private marker carries T even when the value is None.
-type Option[T any] interface{ isOption(T) }
-
-// Some holds a value. Copying Some copies Value using ordinary Go assignment.
-type Some[T any] struct{ Value T }
-
-func (Some[T]) isOption(T) {}
+// Option has an independent inline Some slot. Its zero value is None.
+// Assignment copies the slot with ordinary Go shallow-value semantics.
+type Option[T any] struct {
+	tag  uint8
+	some T
+}
 
 // NewSome constructs Some without cloning or validating its payload.
-func NewSome[T any](value T) Option[T] { return Some[T]{Value: value} }
+func NewSome[T any](value T) Option[T] { return Option[T]{tag: 1, some: value} }
 
 // None constructs an absent Option. Some with a nil payload remains present.
-func None[T any]() Option[T] { return nil }
+func None[T any]() Option[T] { return Option[T]{} }
 
-// ValidateOption rejects noncanonical shapes, including case pointers and
-// foreign structs that acquire the marker by embedding an Option.
+// ValidateOption checks the tag, not inactive storage or payload invariants.
 func ValidateOption[T any](value Option[T]) {
-	switch value.(type) {
-	case nil, Some[T]:
-		return
-	default:
+	if value.tag > 1 {
 		panic("goxide: invalid enum Option")
 	}
 }
 
-// Result contains exactly an Ok or Err value. A nil Result is invalid.
-// Both parameters are present in the marker, including each case's unused one.
-type Result[T, E any] interface{ isResult(T, E) }
+// TagOption reads the raw tag: 0 denotes None and 1 denotes Some.
+// It does not replace ValidateOption.
+func TagOption[T any](value Option[T]) int { return int(value.tag) }
 
-// Ok holds a successful value without cloning it.
-type Ok[T, E any] struct{ Value T }
+// ValueSome copies the active payload using ordinary Go assignment.
+func ValueSome[T any](value Option[T]) T {
+	if TagOption(value) != 1 {
+		panic("goxide: expected Option::Some")
+	}
+	return value.some
+}
 
-// Err holds a failure payload without cloning or projecting it.
-type Err[T, E any] struct{ Value E }
+// ProjectSome returns the actual Some slot. The pointer remains attached to
+// this storage even if the Option is later replaced with None or another Some.
+// It is an ordinary Go pointer; no exclusivity or lifetime restriction is added.
+func ProjectSome[T any](value *Option[T]) *T {
+	if value == nil {
+		panic("goxide: nil Option projection")
+	}
+	if TagOption(*value) != 1 {
+		panic("goxide: expected Option::Some")
+	}
+	return &value.some
+}
 
-func (Ok[T, E]) isResult(T, E)  {}
-func (Err[T, E]) isResult(T, E) {}
+// Result has independent inline Ok and Err slots. Its zero value is invalid.
+// Both type parameters participate in its nominal identity and storage.
+type Result[T, E any] struct {
+	tag uint8
+	ok  T
+	err E
+}
 
-// NewOk constructs an Ok value.
-func NewOk[T, E any](value T) Result[T, E] { return Ok[T, E]{Value: value} }
+// NewOk constructs Ok without cloning or validating its payload.
+func NewOk[T, E any](value T) Result[T, E] { return Result[T, E]{tag: 1, ok: value} }
 
-// NewErr constructs Err even when the payload is nil. Deciding whether a
-// native Go error indicates success belongs to the call adapter, not this API.
-func NewErr[T, E any](value E) Result[T, E] { return Err[T, E]{Value: value} }
+// NewErr constructs Err even when the payload is nil. Whether a native Go error
+// indicates success belongs to the call adapter, not this constructor.
+func NewErr[T, E any](value E) Result[T, E] { return Result[T, E]{tag: 2, err: value} }
 
-// ValidateResult checks only the outer shape. Nested enum checks belong to
-// the caller's statically registered concrete payload validator.
+// ValidateResult checks only the active tag. Inactive slots may contain values
+// written through older projections; they are not part of the active variant.
 func ValidateResult[T, E any](value Result[T, E]) {
-	switch value.(type) {
-	case Ok[T, E], Err[T, E]:
-		return
-	default:
+	if value.tag != 1 && value.tag != 2 {
 		panic("goxide: invalid enum Result")
 	}
+}
+
+// TagResult reads the raw tag: 1 denotes Ok and 2 denotes Err; zero is invalid.
+// It does not replace ValidateResult.
+func TagResult[T, E any](value Result[T, E]) int { return int(value.tag) }
+
+// ValueOk copies the active Ok payload.
+func ValueOk[T, E any](value Result[T, E]) T {
+	if TagResult(value) != 1 {
+		panic("goxide: expected Result::Ok")
+	}
+	return value.ok
+}
+
+// ValueErr copies the active Err payload.
+func ValueErr[T, E any](value Result[T, E]) E {
+	if TagResult(value) != 2 {
+		panic("goxide: expected Result::Err")
+	}
+	return value.err
+}
+
+// ProjectOk returns the actual Ok slot, with the same fixed-storage contract as ProjectSome.
+func ProjectOk[T, E any](value *Result[T, E]) *T {
+	if value == nil {
+		panic("goxide: nil Result projection")
+	}
+	if TagResult(*value) != 1 {
+		panic("goxide: expected Result::Ok")
+	}
+	return &value.ok
+}
+
+// ProjectErr returns a separate slot even when T and E are the same type.
+func ProjectErr[T, E any](value *Result[T, E]) *E {
+	if value == nil {
+		panic("goxide: nil Result projection")
+	}
+	if TagResult(*value) != 2 {
+		panic("goxide: expected Result::Err")
+	}
+	return &value.err
 }
