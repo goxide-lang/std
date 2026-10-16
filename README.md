@@ -1,23 +1,41 @@
-# goxide std — candidate
+# Goxide std
 
-Core types shared by Goxide-generated Go packages. This unreleased candidate is not a v1.0 stability promise. It requires a compiler implementing the matching sum ABI.
+Shared Go packages used by Goxide-generated code. They require Go 1.27 and depend only on the Go standard library.
 
-`formatting` supplies scalar formatters and checked stdout/writer output for generated `print!` / `println!` calls. Format-string parsing and protocol selection remain compiler responsibilities. A failed or short write panics with `*formatting.WriteError`, retaining the original cause and byte counts.
+| Package | Purpose |
+| --- | --- |
+| `github.com/goxide-lang/std/sum` | `Option` and `Result`, constructors, discriminants, checked payload reads and projections. |
+| `github.com/goxide-lang/std/formatting` | Scalar formatting and checked writer output for `print!` / `println!`. Failed or short writes panic with `*WriteError`, preserving the cause and byte counts. |
+| `github.com/goxide-lang/std/runtime` | Assignment-propagation guards and the `Comparable` constraint used by generated code. The Go package name is `goxideruntime`. |
+| `github.com/goxide-lang/std/typeinfo` | Structural `CarrierFor[T, S]` and `Of[T, S]` type-carrier helpers. `Of` returns the zero carrier without constructing `T`, invoking a method, or using reflection. |
 
-`runtime` (Go package name `goxideruntime`) supplies the assignment propagation guard and the hygienic `Comparable` constraint used by generated Go. These are compiler lowering details, not source-language protocols or a stable public ABI.
+Generated programs import only the packages they use; they do not need the compiler module. Serialization protocols and JSON live in the separate [serde repository](https://github.com/goxide-lang/serde).
 
-`typeinfo` supplies the structural `CarrierFor[T, S]` constraint and `Of[T, S]` for generated type carriers. The exact-self method `GoxideInternalTypeCarrierForSelf(T) S` associates a type with a zero-field struct; a promoted parent method does not authorize a different child type. `Of` returns only the zero carrier value: it never constructs a `T`, calls the method, or uses reflection. Its independent marker is `GoxideTypeInfoABI = 1`. This ordinary Go API does not prove compiler provenance or promise source-language introspection; compiler metadata checks remain separate. The package imports nothing and introduces no dependency on sum, serde, or the compiler.
+## Use with Goxide
 
-All packages depend only on the Go standard library. Generated programs import `github.com/goxide-lang/std/formatting`, `github.com/goxide-lang/std/runtime`, `github.com/goxide-lang/std/sum`, and `github.com/goxide-lang/std/typeinfo` as needed; they do not require the compiler module. The former compiler-owned formatting/runtime paths have been removed, with no forwarding packages. Regenerate existing output with the matching compiler.
+Use the std version pinned by your compiler's `go.mod`. After std v0.0.1 is published, install it with:
 
-`sum` provides Option/Result as values with private tags and separate inline payload slots. Assignment has ordinary Go shallow-copy semantics. Cloning is explicit. Option's zero value is None; Result's zero value is invalid. A shape check does not validate application-specific payloads; generated callers must retain their registered payload checks.
+```sh
+go get github.com/goxide-lang/std@v0.0.1
+```
 
-`TagOption` / `TagResult` read raw discriminants without validating them, allowing callers to choose their invalid-value error policy; they do not replace `ValidateOption` / `ValidateResult`. `ValueSome` / `ValueOk` / `ValueErr` copy its payload, while `ProjectSome` / `ProjectOk` / `ProjectErr` return an ordinary Go pointer to its actual slot after checking the variant. A saved pointer remains attached to that slot when the containing value is overwritten. Constructors clear unused slots, but writes through old pointers can subsequently fill inactive slots; validation and language protocols must ignore those inactive values. Distinct variants never share a slot. Slice/map/pointer payloads retain ordinary shallow-copy behavior. Retained pointers or inactive payloads may keep allocations alive; these APIs promise neither exclusive access nor race freedom.
+Run generation again after changing the compiler or this dependency. See [using Goxide in an existing Go project](https://github.com/goxide-lang/goxide/blob/main/docs/using-goxide-gen.md).
 
-The format-independent serialization protocol and JSON implementation belong to the separate `github.com/goxide-lang/serde` module, not this module. No experimental API is included.
+## Option and Result representation
 
-The existing Mozilla Public License 2.0 text is retained in LICENSE. No release tag is provided by this candidate.
+`sum.Option[T]` and `sum.Result[T, E]` are Go structs with private tags and separate inline payload slots (`GoxideSumABI = 3`). Option's zero value is `None`; Result's zero value is invalid. `None` and `Some(nil)` are distinct. Assignment and pointer, slice or map payloads retain ordinary Go shallow-copy semantics; cloning is explicit.
 
-Run `go test -race ./...` and `go vet ./...` with Go 1.27 or newer.
+User-defined Goxide enums use a sealed interface and one pointer struct per variant. They reject nil values. These user enums and std's tagged structs currently have different representations; the compiler lowers their matches accordingly. Unifying std's representation is tracked with safe std in [MVP-6](https://github.com/goxide-lang/goxide/blob/main/docs/mvp-gap-audit.md).
 
-Representation migration: `GoxideSumABI = 3` replaces ABI 2's interfaces and exported `Some` / `Ok` / `Err` case structs. There is no old-layout compatibility API. Use the constructors, raw tag readers, and checked value/projection functions, and regenerate all producers, consumers and compiler metadata together. Option is no longer a nil interface and cannot be compared with nil.
+Use `None`, `NewSome`, `NewOk` and `NewErr` to construct values. `TagOption` / `TagResult` read raw tags; `ValidateOption` / `ValidateResult` check their validity. `ValueSome` / `ValueOk` / `ValueErr` return payload copies. `ProjectSome` / `ProjectOk` / `ProjectErr` check the active variant and return a pointer to its actual slot.
+
+A saved projection remains attached to that slot if the enclosing value is overwritten. Different variants have separate slots; inactive slots do not affect validation. Projections provide ordinary Go pointers, including ordinary aliasing and concurrency rules.
+
+## Development
+
+```sh
+GOWORK=off GOTOOLCHAIN=local go test -race ./...
+GOWORK=off GOTOOLCHAIN=local go vet ./...
+```
+
+Licensed under [Mozilla Public License 2.0](LICENSE).
