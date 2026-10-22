@@ -1,15 +1,18 @@
 # Goxide std
 
-Shared Go packages used by Goxide-generated code. They require Go 1.27 and depend only on the Go standard library.
+Shared packages used by Goxide programs and generated Go code. They require Go 1.27 and depend only on the Go standard library.
 
 | Package | Purpose |
 | --- | --- |
+| `std::convert` | Goxide source traits `From[S]` and `Into[T]`, with ordinary identity and From-to-Into implementations. |
 | `github.com/goxide-lang/std/sum` | `Option` and `Result`, constructors, discriminants, checked payload reads and projections. |
 | `github.com/goxide-lang/std/formatting` | Scalar formatting and checked writer output for `print!` / `println!`. Failed or short writes panic with `*WriteError`, preserving the cause and byte counts. |
 | `github.com/goxide-lang/std/runtime` | Assignment-propagation guards and the `Comparable` constraint used by generated code. The Go package name is `goxideruntime`. |
 | `github.com/goxide-lang/std/typeinfo` | Structural `CarrierFor[T, S]` and `Of[T, S]` type-carrier helpers. `Of` returns the zero carrier without constructing `T`, invoking a method, or using reflection. |
 
 Generated programs import only the packages they use; they do not need the compiler module. Serialization protocols and JSON live in the separate [serde repository](https://github.com/goxide-lang/serde).
+
+`std::convert` is a Goxide source package described by `goxide.toml`. The compiler builds its ordinary trait implementations alongside the selected source dependency graph. `From` preserves ordinary value and reference semantics; it does not clone, unwrap interfaces, or normalize typed nil. `Into` calls the selected `From` through its declared body. Error propagation uses the canonical `From` only when direct assignment is unavailable.
 
 ## Use with Goxide
 
