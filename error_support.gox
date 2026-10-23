@@ -1,0 +1,11 @@
+package std
+use fmt;
+
+// Error messages accept exact builtin scalar types, including transparent aliases.
+pub type ErrorScalar interface {
+    bool | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | uintptr | float32 | float64 | string
+}
+pub func error_scalar[T ErrorScalar](value T) string { return fmt::Sprint(value) }
+
+// Taking the field address preserves exact error identity without spelling checks.
+pub func error_source[T interface { *error }](value T) error { return *value }

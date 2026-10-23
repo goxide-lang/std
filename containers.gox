@@ -1,0 +1,112 @@
+package std
+
+use sort;
+use strconv;
+
+impl[T Clone] crate::Clone for []T {
+    func clone(self &Self) Self {
+        if *self == nil { return nil }
+        result := make([]T, len(*self))
+        for i := range *self { result[i] = Clone::clone(&(*self)[i]) }
+        return result
+    }
+}
+
+impl[T Clone, const N int] crate::Clone for [N]T {
+    func clone(self &Self) Self {
+        var result [N]T
+        for i := range *self { result[i] = Clone::clone(&(*self)[i]) }
+        return result
+    }
+}
+
+impl[T Debug] crate::Debug for []T {
+    func debug(self &Self) string {
+        if *self == nil { return "nil" }
+        result := "["
+        for i := range *self {
+            if i != 0 { result += ", " }
+            result += Debug::debug(&(*self)[i])
+        }
+        return result + "]"
+    }
+}
+
+impl[T Debug, const N int] crate::Debug for [N]T {
+    func debug(self &Self) string {
+        result := "["
+        for i := range *self {
+            if i != 0 { result += ", " }
+            result += Debug::debug(&(*self)[i])
+        }
+        return result + "]"
+    }
+}
+
+impl[T PartialEq] crate::PartialEq for []T {
+    func equals(self Self, other Self) bool {
+        if (self == nil) != (other == nil) || len(self) != len(other) { return false }
+        for i := range self {
+            if !PartialEq::equals(self[i], other[i]) { return false }
+        }
+        return true
+    }
+}
+
+impl[T PartialEq, const N int] crate::PartialEq for [N]T {
+    func equals(self Self, other Self) bool {
+        for i := range self {
+            if !PartialEq::equals(self[i], other[i]) { return false }
+        }
+        return true
+    }
+}
+
+impl[T Eq] crate::Eq for []T {}
+impl[T Eq, const N int] crate::Eq for [N]T {}
+
+// Exact builtin keys retain native map lookup semantics. Defined keys opt into
+// their own Clone implementation; aliases keep the underlying builtin identity.
+type CloneKey interface {
+    bool | int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | uintptr | float32 | float64 | string
+}
+
+impl[K CloneKey, V Clone] crate::Clone for map[K]V {
+    func clone(self &Self) Self {
+        if *self == nil { return nil }
+        result := make(map[K]V, len(*self))
+        for key, value := range *self { result[key] = Clone::clone(&value) }
+        return result
+    }
+}
+
+impl[V Debug] crate::Debug for map[string]V {
+    func debug(self &Self) string {
+        if *self == nil { return "nil" }
+        keys := make([]string, 0, len(*self))
+        for key := range *self { keys = append(keys, key) }
+        sort::Strings(keys)
+        result := "{"
+        for i, key := range keys {
+            if i != 0 { result += ", " }
+            value := (*self)[key]
+            result += strconv::Quote(key) + ": " + Debug::debug(&value)
+        }
+        return result + "}"
+    }
+}
+
+impl[T comparable, const N int] crate::NativeKey for [N]T where T: NativeKey {}
+
+impl[K comparable, V PartialEq] crate::PartialEq for map[K]V where K: NativeKey {
+    func equals(self Self, other Self) bool {
+        if (self == nil) != (other == nil) || len(self) != len(other) { return false }
+        for key, value := range self {
+            otherValue, found := other[key]
+            if !found || !PartialEq::equals(value, otherValue) { return false }
+        }
+        return true
+    }
+}
+
+impl[K comparable, V Eq] crate::Eq for map[K]V where K: NativeKey {}

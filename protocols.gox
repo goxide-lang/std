@@ -1,0 +1,19 @@
+package std
+
+// Default constructs a library-defined value. It does not replace Go zero initialization.
+pub trait Default { func r#default() Self }
+
+// Clone creates an independent value according to the type's implementation.
+pub trait Clone { func clone(self &Self) Self }
+
+pub trait Debug { func debug(self &Self) string }
+pub trait Display { func display(self &Self) string }
+pub trait PartialEq { func equals(self Self, other Self) bool }
+pub trait Eq where Self: PartialEq {}
+pub trait DerivedPartialEq where Self: PartialEq {}
+
+// NativeKey promises that PartialEq agrees with stable native Go map-key equality.
+// Eq alone does not provide this independent qualification.
+pub trait NativeKey where Self: PartialEq, Self: comparable {}
+
+pub func default_value[T Default]() T { return T::r#default() }

@@ -1,0 +1,26 @@
+package std_macros
+use syntax::token;
+use syntax::proc_macro as pm;
+#[proc_macro_derive(Default, attributes(default))]
+pub func deriveDefault(ctx pm::Context,input token::TokenStream) pm::Output { return derive(ctx,input,"Default") }
+#[proc_macro_derive(Clone)]
+pub func deriveClone(ctx pm::Context,input token::TokenStream) pm::Output { return derive(ctx,input,"Clone") }
+#[proc_macro_derive(Debug)]
+pub func deriveDebug(ctx pm::Context,input token::TokenStream) pm::Output { return derive(ctx,input,"Debug") }
+#[proc_macro_derive(PartialEq)]
+pub func derivePartialEq(ctx pm::Context,input token::TokenStream) pm::Output { return derive(ctx,input,"PartialEq") }
+#[proc_macro_derive(Eq)]
+pub func deriveEq(ctx pm::Context,input token::TokenStream) pm::Output { return derive(ctx,input,"Eq") }
+
+#[proc_macro]
+pub func print(ctx pm::Context,input token::TokenStream) pm::Output { return printTokens(ctx,input,false) }
+#[proc_macro]
+pub func println(ctx pm::Context,input token::TokenStream) pm::Output { return printTokens(ctx,input,true) }
+#[proc_macro]
+pub func enum_assert(ctx pm::Context,input token::TokenStream) pm::Output { return assertTokens(ctx,input) }
+
+#[proc_macro_derive(Error, attributes(error,source,from))]
+pub func error(ctx pm::Context,input token::TokenStream) pm::Output { return deriveError(ctx,input) }
+
+#[proc_macro_derive(NativeKey)]
+pub func deriveNativeKey(ctx pm::Context,input token::TokenStream) pm::Output { return derive(ctx,input,"NativeKey") }

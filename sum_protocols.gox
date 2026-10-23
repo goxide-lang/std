@@ -1,0 +1,64 @@
+package std
+
+impl[T any] crate::Default for Option[T] {
+    func r#default() Self { return Option[T]::None }
+}
+
+impl[T Clone] crate::Clone for Option[T] {
+    func clone(self &Self) Self {
+        return match &*self {
+            Option::None => Option[T]::None,
+            Option::Some(value) => Option[T]::Some(Clone::clone(value)),
+        }
+    }
+}
+
+impl[T Debug] crate::Debug for Option[T] {
+    func debug(self &Self) string {
+        return match &*self {
+            Option::None => "Option::None",
+            Option::Some(value) => "Option::Some(" + Debug::debug(value) + ")",
+        }
+    }
+}
+
+impl[T Clone, E Clone] crate::Clone for Result[T,E] {
+    func clone(self &Self) Self {
+        return match &*self {
+            Result::Ok(value) => Result[T,E]::Ok(Clone::clone(value)),
+            Result::Err(value) => Result[T,E]::Err(Clone::clone(value)),
+        }
+    }
+}
+
+impl[T Debug, E Debug] crate::Debug for Result[T,E] {
+    func debug(self &Self) string {
+        return match &*self {
+            Result::Ok(value) => "Result::Ok(" + Debug::debug(value) + ")",
+            Result::Err(value) => "Result::Err(" + Debug::debug(value) + ")",
+        }
+    }
+}
+
+impl[T PartialEq] crate::PartialEq for Option[T] {
+    func equals(self Self,other Self) bool {
+        crate::enum_assert!(self)
+        crate::enum_assert!(other)
+        return match self {
+            Option::None => match other { Option::None => true, _ => false, },
+            Option::Some(left) => match other { Option::Some(right) => PartialEq::equals(left,right), _ => false, },
+        }
+    }
+}
+impl[T Eq] crate::Eq for Option[T] {}
+impl[T PartialEq,E PartialEq] crate::PartialEq for Result[T,E] {
+    func equals(self Self,other Self) bool {
+        crate::enum_assert!(self)
+        crate::enum_assert!(other)
+        return match self {
+            Result::Ok(left) => match other { Result::Ok(right) => PartialEq::equals(left,right), _ => false, },
+            Result::Err(left) => match other { Result::Err(right) => PartialEq::equals(left,right), _ => false, },
+        }
+    }
+}
+impl[T Eq,E Eq] crate::Eq for Result[T,E] {}

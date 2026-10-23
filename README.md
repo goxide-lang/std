@@ -1,9 +1,11 @@
 # Goxide std
 
-Shared packages used by Goxide programs and generated Go code. They require Go 1.27 and depend only on the Go standard library.
+Shared packages used by Goxide programs and generated Go code. They require Go 1.27. The runtime packages use the Go standard library; the procedural macro package uses the public Goxide syntax SDK.
 
 | Package | Purpose |
 | --- | --- |
+| `std` | Ordinary `Default`, `Clone`, `Debug`, `Display`, `PartialEq`, `Eq` and `NativeKey` traits, with explicit primitive and container implementations. Reexports `From` and `Into`. |
+| `std::derive` | Procedural `Default`, `Clone`, `Debug`, `PartialEq`, `Eq`, `NativeKey` and `Error` derives. |
 | `std::convert` | Goxide source traits `From[S]` and `Into[T]`, with ordinary identity and From-to-Into implementations. |
 | `github.com/goxide-lang/std/sum` | `Option` and `Result`, constructors, discriminants, checked payload reads and projections. |
 | `github.com/goxide-lang/std/formatting` | Scalar formatting and checked writer output for `print!` / `println!`. Failed or short writes panic with `*WriteError`, preserving the cause and byte counts. |
@@ -16,11 +18,32 @@ Generated programs import only the packages they use; they do not need the compi
 
 ## Use with Goxide
 
-Use the std version pinned by your compiler's `go.mod`. After std v0.0.1 is published, install it with:
+Use the std version pinned by your compiler's `go.mod` in the project's std dependency. Imports are explicit:
 
-```sh
-go get github.com/goxide-lang/std@v0.0.1
+```goxide
+use std;
+
+#[derive(std::derive::Default, std::derive::Clone, std::derive::Debug)]
+struct Config { Port int; Name string }
+
+func example() {
+    value := std::default_value[Config]()
+    copy := std::Clone::clone(&value)
+    std::println!("{:?}", copy)
+}
 ```
+
+`Default` is an ordinary constructor protocol. Zero initialization does not call it. An enum derives Default from exactly one `#[default]` variant and only requires defaults for that variant's payload. `Option[T]` defaults to `None`; slices, arrays, maps and `Result` have no Default implementation.
+
+`Clone` copies supported containers into independent storage, retaining the difference between nil and empty slices or maps. `Debug` formats fields in declaration order and sorts string map keys. Printing and deriving use the same Debug protocol, including complex values and fields. `PartialEq` compares payloads through their explicit implementations, short circuits in field order, and distinguishes nil from empty containers. Floating-point comparison keeps native NaN behavior.
+
+`Eq` is an ordinary marker promise. Deriving it requires `DerivedPartialEq` for the target and `Eq` for its fields. The PartialEq derive supplies `DerivedPartialEq`; authors can also implement that marker explicitly. No compiler provenance check makes this promise unforgeable.
+
+Map equality additionally requires `NativeKey`, which promises that the key's PartialEq agrees with stable native Go map-key equality. An Eq implementation does not imply NativeKey. Struct keys opt in with `#[derive(std::derive::NativeKey)]` or an explicit implementation; the derive requires NativeKey for every field. Builtin boolean, integer and string keys, and arrays of native keys, have library implementations. Float, complex and enum keys have no derived NativeKey implementation. Map Clone retains its exact builtin scalar-key boundary, while map Debug accepts string keys.
+
+The `print!` and `println!` macros accept `{}` for Display, `{:?}` for Debug, and escaped `{{` and `}}`. Every argument is evaluated once, before formatting starts. The macros retain the caller's control-flow frame and write the resulting text once through `formatting.Write`.
+
+`Error` uses `#[error("message {field}")]`, `#[source]` and `#[from]` to generate ordinary `Error`/`Unwrap` methods. A `#[from]` source also generates a `From[error]` implementation. Message fields must have exact builtin scalar types; source fields must have the exact `error` type, including transparent aliases.
 
 Run generation again after changing the compiler or this dependency. See [using Goxide in an existing Go project](https://github.com/goxide-lang/goxide/blob/main/docs/using-goxide-gen.md).
 
@@ -29,6 +52,8 @@ Run generation again after changing the compiler or this dependency. See [using 
 `sum.Option[T]` and `sum.Result[T, E]` are Go structs with private tags and separate inline payload slots (`GoxideSumABI = 3`). Option's zero value is `None`; Result's zero value is invalid. `None` and `Some(nil)` are distinct. Assignment and pointer, slice or map payloads retain ordinary Go shallow-copy semantics; cloning is explicit.
 
 User-defined Goxide enums use a sealed interface and one pointer struct per variant. They reject nil values. These user enums and std's tagged structs currently have different representations; the compiler lowers their matches accordingly. Unifying std's representation is tracked with safe std in [MVP-6](https://github.com/goxide-lang/goxide/blob/main/docs/mvp-gap-audit.md).
+
+Goxide enum variants and payload slots are immutable. Assigning a new enum value rebinds the variable. A slice, map or pointer payload read by value retains its own permissions, so its referenced contents can still be mutable without replacing the enum's payload slot.
 
 Use `None`, `NewSome`, `NewOk` and `NewErr` to construct values. `TagOption` / `TagResult` read raw tags; `ValidateOption` / `ValidateResult` check their validity. `ValueSome` / `ValueOk` / `ValueErr` return payload copies. `ProjectSome` / `ProjectOk` / `ProjectErr` check the active variant and return a pointer to its actual slot.
 
