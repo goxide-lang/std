@@ -8,3 +8,7 @@ path = "."
 
 [dependencies.std_macros]
 path = "macros"
+
+[[go.require]]
+module = "github.com/goxide-lang/syntax"
+version = "v0.0.0-20261021034157-cb998fa4b2d4"
