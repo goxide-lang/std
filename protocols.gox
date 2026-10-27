@@ -1,7 +1,7 @@
 package std
 
 // Default constructs a library-defined value. It does not replace Go zero initialization.
-pub trait Default { func r#default() Self }
+pub trait Default { func Default() Self }
 
 // Clone creates an independent value according to the type's implementation.
 pub trait Clone { func clone(self &Self) Self }
@@ -16,4 +16,4 @@ pub trait DerivedPartialEq where Self: PartialEq {}
 // Eq alone does not provide this independent qualification.
 pub trait NativeKey where Self: PartialEq, Self: comparable {}
 
-pub func default_value[T Default]() T { return T::r#default() }
+pub func default_value[T Default]() T { return T::Default() }

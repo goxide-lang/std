@@ -56,6 +56,20 @@ func TestDefaultOnlyConstrainsSelectedPayload(t *testing.T) {
 	}
 }
 
+func TestDefaultDeriveUsesOrdinaryMethodName(t *testing.T) {
+	for _, source := range []string{"struct Config { value int }", "enum Choice { #[default] Selected(int), Other, }"} {
+		ctx, input := invocation(t, source, pm.Derive)
+		output := derive(ctx, input, "Default")
+		if len(output.Diagnostics) != 0 {
+			t.Fatal(output.Diagnostics)
+		}
+		printed := strings.ReplaceAll(output.Tokens.Display(), " ", "")
+		if !strings.Contains(printed, "funcDefault()Self") || strings.Contains(printed, "r#default") {
+			t.Fatalf("Default method name: %s", output.Tokens.Display())
+		}
+	}
+}
+
 func TestDeriveReplaysRawPrivateFields(t *testing.T) {
 	ctx, input := invocation(t, "struct Model[T any] where T: Bound { r#type T }", pm.Derive)
 	output := derive(ctx, input, "Clone")

@@ -126,7 +126,7 @@ func derive(ctx pm.Context, input token.TokenStream, kind string) pm.Output {
 	var members token.TokenStream
 	switch kind {
 	case "Default", "Clone":
-		signature := "func r#default() Self"
+		signature := "func Default() Self"
 		if kind == "Clone" {
 			signature = "func clone(self &Self) Self"
 		}
@@ -274,7 +274,7 @@ func deriveEnum(ctx pm.Context, item syn.Item, root, protocol token.TokenStream,
 		}
 		arms = arms.Append(pattern.Tokens()...).Append(fragment(ctx, "=>").Tokens()...).Append(expression.Tokens()...).Append(fragment(ctx, ",").Tokens()...)
 	}
-	signature := "func r#default() Self"
+	signature := "func Default() Self"
 	if kind != "Default" {
 		signature = "func clone(self &Self) Self"
 		if kind == "Debug" {

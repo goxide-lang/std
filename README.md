@@ -33,7 +33,7 @@ func example() {
 }
 ```
 
-`Default` is an ordinary constructor protocol. Zero initialization does not call it. An enum derives Default from exactly one `#[default]` variant and only requires defaults for that variant's payload. `Option[T]` defaults to `None`; slices, arrays, maps and `Result` have no Default implementation.
+`Default` is an ordinary constructor protocol with the static method `Default() Self`. Zero initialization does not call it. An enum derives Default from exactly one `#[default]` variant and only requires defaults for that variant's payload. `Option[T]` defaults to `None`; slices, arrays, maps and `Result` have no Default implementation.
 
 `Clone` copies supported containers into independent storage, retaining the difference between nil and empty slices or maps. `Debug` formats fields in declaration order and sorts string map keys. Printing and deriving use the same Debug protocol, including complex values and fields. `PartialEq` compares payloads through their explicit implementations, short circuits in field order, and distinguishes nil from empty containers. Floating-point comparison keeps native NaN behavior.
 

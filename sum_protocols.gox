@@ -1,7 +1,7 @@
 package std
 
 impl[T any] crate::Default for Option[T] {
-    func r#default() Self { return Option[T]::None }
+    func Default() Self { return Option[T]::None }
 }
 
 impl[T Clone] crate::Clone for Option[T] {

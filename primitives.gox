@@ -2,7 +2,7 @@ package std
 
 use crate::formatting;
 
-impl crate::Default for bool { func r#default() Self { return false } }
+impl crate::Default for bool { func Default() Self { return false } }
 impl crate::Clone for bool { func clone(self &Self) Self { return *self } }
 impl crate::Debug for bool { func debug(self &Self) string { return formatting::Bool(*self) } }
 impl crate::Display for bool { func display(self &Self) string { return formatting::Bool(*self) } }
@@ -10,7 +10,7 @@ impl crate::PartialEq for bool { func equals(self Self, other Self) bool { retur
 impl crate::Eq for bool {}
 impl crate::NativeKey for bool {}
 
-impl crate::Default for int { func r#default() Self { return 0 } }
+impl crate::Default for int { func Default() Self { return 0 } }
 impl crate::Clone for int { func clone(self &Self) Self { return *self } }
 impl crate::Debug for int { func debug(self &Self) string { return formatting::Int(*self) } }
 impl crate::Display for int { func display(self &Self) string { return formatting::Int(*self) } }
@@ -18,7 +18,7 @@ impl crate::PartialEq for int { func equals(self Self, other Self) bool { return
 impl crate::Eq for int {}
 impl crate::NativeKey for int {}
 
-impl crate::Default for int8 { func r#default() Self { return 0 } }
+impl crate::Default for int8 { func Default() Self { return 0 } }
 impl crate::Clone for int8 { func clone(self &Self) Self { return *self } }
 impl crate::Debug for int8 { func debug(self &Self) string { return formatting::Int8(*self) } }
 impl crate::Display for int8 { func display(self &Self) string { return formatting::Int8(*self) } }
@@ -26,7 +26,7 @@ impl crate::PartialEq for int8 { func equals(self Self, other Self) bool { retur
 impl crate::Eq for int8 {}
 impl crate::NativeKey for int8 {}
 
-impl crate::Default for int16 { func r#default() Self { return 0 } }
+impl crate::Default for int16 { func Default() Self { return 0 } }
 impl crate::Clone for int16 { func clone(self &Self) Self { return *self } }
 impl crate::Debug for int16 { func debug(self &Self) string { return formatting::Int16(*self) } }
 impl crate::Display for int16 { func display(self &Self) string { return formatting::Int16(*self) } }
@@ -34,7 +34,7 @@ impl crate::PartialEq for int16 { func equals(self Self, other Self) bool { retu
 impl crate::Eq for int16 {}
 impl crate::NativeKey for int16 {}
 
-impl crate::Default for int32 { func r#default() Self { return 0 } }
+impl crate::Default for int32 { func Default() Self { return 0 } }
 impl crate::Clone for int32 { func clone(self &Self) Self { return *self } }
 impl crate::Debug for int32 { func debug(self &Self) string { return formatting::Int32(*self) } }
 impl crate::Display for int32 { func display(self &Self) string { return formatting::Int32(*self) } }
@@ -42,7 +42,7 @@ impl crate::PartialEq for int32 { func equals(self Self, other Self) bool { retu
 impl crate::Eq for int32 {}
 impl crate::NativeKey for int32 {}
 
-impl crate::Default for int64 { func r#default() Self { return 0 } }
+impl crate::Default for int64 { func Default() Self { return 0 } }
 impl crate::Clone for int64 { func clone(self &Self) Self { return *self } }
 impl crate::Debug for int64 { func debug(self &Self) string { return formatting::Int64(*self) } }
 impl crate::Display for int64 { func display(self &Self) string { return formatting::Int64(*self) } }
@@ -50,7 +50,7 @@ impl crate::PartialEq for int64 { func equals(self Self, other Self) bool { retu
 impl crate::Eq for int64 {}
 impl crate::NativeKey for int64 {}
 
-impl crate::Default for uint { func r#default() Self { return 0 } }
+impl crate::Default for uint { func Default() Self { return 0 } }
 impl crate::Clone for uint { func clone(self &Self) Self { return *self } }
 impl crate::Debug for uint { func debug(self &Self) string { return formatting::Uint(*self) } }
 impl crate::Display for uint { func display(self &Self) string { return formatting::Uint(*self) } }
@@ -58,7 +58,7 @@ impl crate::PartialEq for uint { func equals(self Self, other Self) bool { retur
 impl crate::Eq for uint {}
 impl crate::NativeKey for uint {}
 
-impl crate::Default for uint8 { func r#default() Self { return 0 } }
+impl crate::Default for uint8 { func Default() Self { return 0 } }
 impl crate::Clone for uint8 { func clone(self &Self) Self { return *self } }
 impl crate::Debug for uint8 { func debug(self &Self) string { return formatting::Uint8(*self) } }
 impl crate::Display for uint8 { func display(self &Self) string { return formatting::Uint8(*self) } }
@@ -66,7 +66,7 @@ impl crate::PartialEq for uint8 { func equals(self Self, other Self) bool { retu
 impl crate::Eq for uint8 {}
 impl crate::NativeKey for uint8 {}
 
-impl crate::Default for uint16 { func r#default() Self { return 0 } }
+impl crate::Default for uint16 { func Default() Self { return 0 } }
 impl crate::Clone for uint16 { func clone(self &Self) Self { return *self } }
 impl crate::Debug for uint16 { func debug(self &Self) string { return formatting::Uint16(*self) } }
 impl crate::Display for uint16 { func display(self &Self) string { return formatting::Uint16(*self) } }
@@ -74,7 +74,7 @@ impl crate::PartialEq for uint16 { func equals(self Self, other Self) bool { ret
 impl crate::Eq for uint16 {}
 impl crate::NativeKey for uint16 {}
 
-impl crate::Default for uint32 { func r#default() Self { return 0 } }
+impl crate::Default for uint32 { func Default() Self { return 0 } }
 impl crate::Clone for uint32 { func clone(self &Self) Self { return *self } }
 impl crate::Debug for uint32 { func debug(self &Self) string { return formatting::Uint32(*self) } }
 impl crate::Display for uint32 { func display(self &Self) string { return formatting::Uint32(*self) } }
@@ -82,7 +82,7 @@ impl crate::PartialEq for uint32 { func equals(self Self, other Self) bool { ret
 impl crate::Eq for uint32 {}
 impl crate::NativeKey for uint32 {}
 
-impl crate::Default for uint64 { func r#default() Self { return 0 } }
+impl crate::Default for uint64 { func Default() Self { return 0 } }
 impl crate::Clone for uint64 { func clone(self &Self) Self { return *self } }
 impl crate::Debug for uint64 { func debug(self &Self) string { return formatting::Uint64(*self) } }
 impl crate::Display for uint64 { func display(self &Self) string { return formatting::Uint64(*self) } }
@@ -90,7 +90,7 @@ impl crate::PartialEq for uint64 { func equals(self Self, other Self) bool { ret
 impl crate::Eq for uint64 {}
 impl crate::NativeKey for uint64 {}
 
-impl crate::Default for uintptr { func r#default() Self { return 0 } }
+impl crate::Default for uintptr { func Default() Self { return 0 } }
 impl crate::Clone for uintptr { func clone(self &Self) Self { return *self } }
 impl crate::Debug for uintptr { func debug(self &Self) string { return formatting::Uintptr(*self) } }
 impl crate::Display for uintptr { func display(self &Self) string { return formatting::Uintptr(*self) } }
@@ -98,13 +98,13 @@ impl crate::PartialEq for uintptr { func equals(self Self, other Self) bool { re
 impl crate::Eq for uintptr {}
 impl crate::NativeKey for uintptr {}
 
-impl crate::Default for float32 { func r#default() Self { return 0 } }
+impl crate::Default for float32 { func Default() Self { return 0 } }
 impl crate::Clone for float32 { func clone(self &Self) Self { return *self } }
 impl crate::Debug for float32 { func debug(self &Self) string { return formatting::Float32(*self) } }
 impl crate::Display for float32 { func display(self &Self) string { return formatting::Float32(*self) } }
 impl crate::PartialEq for float32 { func equals(self Self, other Self) bool { return self == other } }
 
-impl crate::Default for float64 { func r#default() Self { return 0 } }
+impl crate::Default for float64 { func Default() Self { return 0 } }
 impl crate::Clone for float64 { func clone(self &Self) Self { return *self } }
 impl crate::Debug for float64 { func debug(self &Self) string { return formatting::Float64(*self) } }
 impl crate::Display for float64 { func display(self &Self) string { return formatting::Float64(*self) } }
@@ -118,7 +118,7 @@ impl crate::Display for complex128 { func display(self &Self) string { return fo
 impl crate::Debug for complex128 { func debug(self &Self) string { return formatting::Complex128(*self) } }
 impl crate::PartialEq for complex128 { func equals(self Self, other Self) bool { return self == other } }
 
-impl crate::Default for string { func r#default() Self { return "" } }
+impl crate::Default for string { func Default() Self { return "" } }
 impl crate::Clone for string { func clone(self &Self) Self { return *self } }
 impl crate::Debug for string { func debug(self &Self) string { return formatting::DebugString(*self) } }
 impl crate::Display for string { func display(self &Self) string { return formatting::DisplayString(*self) } }
