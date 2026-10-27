@@ -5,6 +5,7 @@ Shared packages used by Goxide programs and generated Go code. They require Go 1
 | Package | Purpose |
 | --- | --- |
 | `std` | Ordinary `Default`, `Clone`, `Debug`, `Display`, `PartialEq`, `Eq` and `NativeKey` traits, with explicit primitive and container implementations. Reexports `From` and `Into`. |
+| `std::prelude` | Common traits, `default_value`, derive, printing and enum assertion macros, and the `derive` namespace. Automatically available in each `.gox` file. |
 | `std::derive` | Procedural `Default`, `Clone`, `Debug`, `PartialEq`, `Eq`, `NativeKey` and `Error` derives. |
 | `std::convert` | Goxide source traits `From[S]` and `Into[T]`, with ordinary identity and From-to-Into implementations. |
 | `github.com/goxide-lang/std/sum` | `Option` and `Result`, constructors, discriminants, checked payload reads and projections. |
@@ -18,22 +19,33 @@ Generated programs import only the packages they use; they do not need the compi
 
 ## Use with Goxide
 
-Use the std version pinned by your compiler's `go.mod` in the project's std dependency. Imports are explicit:
+Goxide v0.0.3 pins std v0.0.2. Use that std version in the project's dependency declaration. Each `.gox` file automatically receives `std::prelude` from the selected std source:
 
 ```goxide
-use std;
-
-#[derive(std::derive::Default, std::derive::Clone, std::derive::Debug)]
+#[derive(Default, Clone, Debug)]
 struct Config { Port int; Name string }
 
 func example() {
-    value := std::default_value[Config]()
-    copy := std::Clone::clone(&value)
-    std::println!("{:?}", copy)
+    value := default_value[Config]()
+    copy := Clone::clone(&value)
+    println!("{:?}", copy)
 }
 ```
 
+The prelude exports the traits `Default`, `Clone`, `Debug`, `Display`, `PartialEq`, `Eq`, `NativeKey`, `From`, and `Into`; the function `default_value`; the macros `print!`, `println!`, and `enum_assert!`; and the derive macros `Default`, `Clone`, `Debug`, `PartialEq`, `Eq`, `NativeKey`, and `Error`. The `derive` namespace remains available for qualified paths such as `derive::Debug`. `Option`, `Result`, `Some`, `None`, `Ok`, and `Err` are already supplied by the language.
+
+Macros occupy a separate namespace from ordinary types, traits, values, and modules. `Debug` in a trait bound selects the trait; `Debug` in `#[derive(Debug)]` selects the macro. A single `use library::Name;` imports every public `Name` exported by that target in both namespaces. Function-like, attribute, and derive calls still require the matching macro entry kind.
+
+Within each namespace, declarations and named `use` bindings take precedence over explicit globs, which take precedence over the automatic prelude. A binding in one namespace does not hide a name in the other; ambiguity within one namespace remains an error. Private `use` bindings retain their existing file scope. Macro expansion retains definition-site hygiene. Generated Go imports follow actual symbol use; the prelude does not add an import for every exported name. Compile-time-only macros add no runtime import to the consuming file. Native `gen` retains their actual generation dependencies in its tools file; an unused prelude adds no tools import.
+
 `Default` is an ordinary constructor protocol with the static method `Default() Self`. Zero initialization does not call it. An enum derives Default from exactly one `#[default]` variant and only requires defaults for that variant's payload. `Option[T]` defaults to `None`; slices, arrays, maps and `Result` have no Default implementation.
+
+```goxide
+struct Settings { Port int }
+impl Default for Settings {
+    func Default() Self { return Self{Port: 8080} }
+}
+```
 
 `Clone` copies supported containers into independent storage, retaining the difference between nil and empty slices or maps. `Debug` formats fields in declaration order and sorts string map keys. Printing and deriving use the same Debug protocol, including complex values and fields. `PartialEq` compares payloads through their explicit implementations, short circuits in field order, and distinguishes nil from empty containers. Floating-point comparison keeps native NaN behavior.
 
